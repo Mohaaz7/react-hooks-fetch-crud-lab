@@ -9,11 +9,10 @@ function QuestionForm({ onAddQuestion }) {
 
   function handleChange(e) {
     const { name, value } = e.target;
-
     if (name.startsWith("answer")) {
-      const index = parseInt(name.replace("answer", ""));
+      const idx = parseInt(name.replace("answer", ""), 10);
       const newAnswers = [...formData.answers];
-      newAnswers[index] = value;
+      newAnswers[idx] = value;
       setFormData({ ...formData, answers: newAnswers });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -26,7 +25,7 @@ function QuestionForm({ onAddQuestion }) {
     const newQuestion = {
       prompt: formData.prompt,
       answers: formData.answers,
-      correctIndex: parseInt(formData.correctIndex),
+      correctIndex: parseInt(formData.correctIndex, 10),
     };
 
     fetch("http://localhost:4000/questions", {
@@ -37,7 +36,6 @@ function QuestionForm({ onAddQuestion }) {
       .then((r) => r.json())
       .then(onAddQuestion);
 
-    // Reset form
     setFormData({
       prompt: "",
       answers: ["", "", "", ""],
@@ -58,17 +56,19 @@ function QuestionForm({ onAddQuestion }) {
             onChange={handleChange}
           />
         </label>
-        {formData.answers.map((answer, i) => (
+
+        {formData.answers.map((ans, i) => (
           <label key={i}>
             Answer {i + 1}:
             <input
               type="text"
               name={`answer${i}`}
-              value={answer}
+              value={ans}
               onChange={handleChange}
             />
           </label>
         ))}
+
         <label>
           Correct Answer:
           <select
@@ -78,11 +78,12 @@ function QuestionForm({ onAddQuestion }) {
           >
             {formData.answers.map((_, i) => (
               <option key={i} value={i}>
-                {`Answer ${i + 1}`}
+                Answer {i + 1}
               </option>
             ))}
           </select>
         </label>
+
         <button type="submit">Add Question</button>
       </form>
     </section>

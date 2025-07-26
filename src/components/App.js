@@ -4,7 +4,8 @@ import QuestionForm from "./QuestionForm";
 
 function App() {
   const [questions, setQuestions] = useState([]);
-  const [showQuestions, setShowQuestions] = useState(false); // needed for test
+  const [showQuestions, setShowQuestions] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:4000/questions")
@@ -14,28 +15,32 @@ function App() {
 
   function handleAddQuestion(newQuestion) {
     setQuestions([...questions, newQuestion]);
+    setShowForm(false);
+    setShowQuestions(true);
   }
 
   function handleDeleteQuestion(id) {
-    const updated = questions.filter((q) => q.id !== id);
-    setQuestions(updated);
+    setQuestions(questions.filter((q) => q.id !== id));
   }
 
   function handleUpdateQuestion(updatedQ) {
-    const updated = questions.map((q) =>
-      q.id === updatedQ.id ? updatedQ : q
+    setQuestions(
+      questions.map((q) => (q.id === updatedQ.id ? updatedQ : q))
     );
-    setQuestions(updated);
   }
 
   return (
     <section>
       <h1>Quiz Admin Panel</h1>
 
-      {/* Required by test */}
-      <button onClick={() => setShowQuestions(true)}>View Questions</button>
+      <button onClick={() => { setShowQuestions(true); setShowForm(false); }}>
+        View Questions
+      </button>
+      <button onClick={() => { setShowForm(true); setShowQuestions(false); }}>
+        New Question
+      </button>
 
-      <QuestionForm onAddQuestion={handleAddQuestion} />
+      {showForm && <QuestionForm onAddQuestion={handleAddQuestion} />}
 
       {showQuestions && (
         <QuestionList
