@@ -9,31 +9,32 @@ function QuestionItem({ question, onDelete, onUpdate }) {
     }).then(() => onDelete(id));
   }
 
-  function handleSelectChange(e) {
-    const newCorrectIndex = parseInt(e.target.value);
-
+  function handleChange(e) {
+    const newIndex = parseInt(e.target.value);
     fetch(`http://localhost:4000/questions/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ correctIndex: newCorrectIndex }),
+      body: JSON.stringify({ correctIndex: newIndex }),
     })
-      .then((r) => r.json())
+      .then((res) => res.json())
       .then(onUpdate);
   }
 
   return (
     <li>
       <h4>{prompt}</h4>
-      <label>
-        Correct Answer:
-        <select value={correctIndex} onChange={handleSelectChange}>
-          {answers.map((answer, index) => (
-            <option key={index} value={index}>
-              {answer}
-            </option>
-          ))}
-        </select>
-      </label>
+      <label htmlFor={`correct-${id}`}>Correct Answer:</label>
+      <select
+        id={`correct-${id}`}
+        value={correctIndex}
+        onChange={handleChange}
+      >
+        {answers.map((answer, index) => (
+          <option key={index} value={index}>
+            {answer}
+          </option>
+        ))}
+      </select>
       <button onClick={handleDelete}>Delete Question</button>
     </li>
   );

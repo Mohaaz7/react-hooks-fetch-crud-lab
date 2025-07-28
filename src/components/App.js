@@ -4,49 +4,38 @@ import QuestionForm from "./QuestionForm";
 
 function App() {
   const [questions, setQuestions] = useState([]);
-  const [showQuestions, setShowQuestions] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:4000/questions")
-      .then((r) => r.json())
+      .then((res) => res.json())
       .then(setQuestions);
   }, []);
 
   function handleAddQuestion(newQuestion) {
     setQuestions([...questions, newQuestion]);
-    setShowForm(false);
-    setShowQuestions(true);
   }
 
-  function handleDeleteQuestion(id) {
-    setQuestions(questions.filter((q) => q.id !== id));
+  function handleDeleteQuestion(deletedId) {
+    setQuestions(questions.filter((q) => q.id !== deletedId));
   }
 
-  function handleUpdateQuestion(updatedQ) {
-    setQuestions(
-      questions.map((q) => (q.id === updatedQ.id ? updatedQ : q))
-    );
+  function handleUpdateQuestion(updatedQuestion) {
+    setQuestions(questions.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
   }
 
   return (
     <section>
       <h1>Quiz Admin Panel</h1>
-
-      <button onClick={() => { setShowQuestions(true); setShowForm(false); }}>
-        View Questions
-      </button>
-      <button onClick={() => { setShowForm(true); setShowQuestions(false); }}>
-        New Question
-      </button>
-
-      {showForm && <QuestionForm onAddQuestion={handleAddQuestion} />}
-
-      {showQuestions && (
+      <button onClick={() => setShowForm(false)}>View Questions</button>
+      <button onClick={() => setShowForm(true)}>New Question</button>
+      {showForm ? (
+        <QuestionForm onAddQuestion={handleAddQuestion} />
+      ) : (
         <QuestionList
           questions={questions}
-          onDeleteQuestion={handleDeleteQuestion}
-          onUpdateQuestion={handleUpdateQuestion}
+          onDelete={handleDeleteQuestion}
+          onUpdate={handleUpdateQuestion}
         />
       )}
     </section>

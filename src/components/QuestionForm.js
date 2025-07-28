@@ -9,82 +9,70 @@ function QuestionForm({ onAddQuestion }) {
 
   function handleChange(e) {
     const { name, value } = e.target;
+
     if (name.startsWith("answer")) {
-      const idx = parseInt(name.replace("answer", ""), 10);
+      const index = parseInt(name.replace("answer", ""));
       const newAnswers = [...formData.answers];
-      newAnswers[idx] = value;
+      newAnswers[index] = value;
       setFormData({ ...formData, answers: newAnswers });
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData({
+        ...formData,
+        [name]: name === "correctIndex" ? parseInt(value) : value,
+      });
     }
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-
-    const newQuestion = {
-      prompt: formData.prompt,
-      answers: formData.answers,
-      correctIndex: parseInt(formData.correctIndex, 10),
-    };
-
     fetch("http://localhost:4000/questions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newQuestion),
+      body: JSON.stringify(formData),
     })
-      .then((r) => r.json())
+      .then((res) => res.json())
       .then(onAddQuestion);
-
-    setFormData({
-      prompt: "",
-      answers: ["", "", "", ""],
-      correctIndex: 0,
-    });
   }
 
   return (
     <section>
       <h2>New Question</h2>
       <form onSubmit={handleSubmit}>
-        <label>
-          Prompt:
-          <input
-            type="text"
-            name="prompt"
-            value={formData.prompt}
-            onChange={handleChange}
-          />
-        </label>
+        <label htmlFor="prompt">Prompt:</label>
+        <input
+          id="prompt"
+          name="prompt"
+          value={formData.prompt}
+          onChange={handleChange}
+        />
 
-        {formData.answers.map((ans, i) => (
-          <label key={i}>
-            Answer {i + 1}:
+        {formData.answers.map((answer, index) => (
+          <div key={index}>
+            <label htmlFor={`answer${index}`}>Answer {index + 1}:</label>
             <input
-              type="text"
-              name={`answer${i}`}
-              value={ans}
+              id={`answer${index}`}
+              name={`answer${index}`}
+              value={answer}
               onChange={handleChange}
             />
-          </label>
+          </div>
         ))}
 
-        <label>
-          Correct Answer:
-          <select
-            name="correctIndex"
-            value={formData.correctIndex}
-            onChange={handleChange}
-          >
-            {formData.answers.map((_, i) => (
-              <option key={i} value={i}>
-                Answer {i + 1}
-              </option>
-            ))}
-          </select>
-        </label>
+        <label htmlFor="correctIndex">Correct Answer:</label>
+        <select
+          id="correctIndex"
+          name="correctIndex"
+          value={formData.correctIndex}
+          onChange={handleChange}
+        >
+          {formData.answers.map((_, index) => (
+            <option key={index} value={index}>
+              {index}
+            </option>
+          ))}
+        </select>
 
-        <button type="submit">Add Question</button>
+        <button type="submit">Submit</button>
       </form>
     </section>
   );
