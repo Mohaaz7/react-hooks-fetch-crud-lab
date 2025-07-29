@@ -1,44 +1,69 @@
-import React, { useEffect, useState } from "react";
-import QuestionList from "./QuestionList";
+import React, { useState, useEffect } from "react";
+import AdminNavBar from "./AdminNavBar";
 import QuestionForm from "./QuestionForm";
+import QuestionList from "./QuestionList";
 
 function App() {
+  const [page, setPage] = useState("List");
   const [questions, setQuestions] = useState([]);
-  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:4000/questions")
-      .then((res) => res.json())
-      .then(setQuestions);
+      .then((r) => r.json())
+      .then((data) => setQuestions(data));
   }, []);
 
   function handleAddQuestion(newQuestion) {
-    setQuestions([...questions, newQuestion]);
+    fetch("http://localhost:4000/questions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newQuestion),
+    })
+      .then((r) => r.json())
+      .then((data) => setQuestions([...questions, data]));
   }
 
-  function handleDeleteQuestion(deletedId) {
-    setQuestions(questions.filter((q) => q.id !== deletedId));
+  function handleDeleteQuestion(id) {
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "DELETE",
+    }).then(() => {
+      setQuestions(questions.filter((question) => question.id !== id));
+    });
   }
 
-  function handleUpdateQuestion(updatedQuestion) {
-    setQuestions(questions.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
+  function handleUpdateQuestion(id, updatedData) {
+    const updatedQuestions = questions.map((q) => {
+      if (q.id === id) {
+        return { ...q, ...updatedData };
+      }
+      return q;
+    });
+    setQuestions(updatedQuestions);
+    
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+    });
   }
 
   return (
-    <section>
-      <h1>Quiz Admin Panel</h1>
-      <button onClick={() => setShowForm(false)}>View Questions</button>
-      <button onClick={() => setShowForm(true)}>New Question</button>
-      {showForm ? (
+    <main>
+      <AdminNavBar onChangePage={setPage} />
+      {page === "Form" ? (
         <QuestionForm onAddQuestion={handleAddQuestion} />
       ) : (
-        <QuestionList
-          questions={questions}
-          onDelete={handleDeleteQuestion}
-          onUpdate={handleUpdateQuestion}
+        <QuestionList 
+          questions={questions} 
+          onDeleteQuestion={handleDeleteQuestion}
+          onUpdateQuestion={handleUpdateQuestion}
         />
       )}
-    </section>
+    </main>
   );
 }
 
